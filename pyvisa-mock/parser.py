@@ -180,6 +180,15 @@ def get_channel(device, ch_name, channel_dict, loader, resource_dict):
 
     return channels
 
+import importlib
+
+def class_for_name(module_name, class_name):
+    # load the module, will raise ImportError if module cannot be loaded
+    m = importlib.import_module(module_name)
+    # get the class, will raise AttributeError if class cannot be found
+    c = getattr(m, class_name)
+    return c
+
 
 def get_device(name, device_dict, loader, resource_dict):
     """Get a device from a device dictionary.
@@ -188,7 +197,8 @@ def get_device(name, device_dict, loader, resource_dict):
     :param device_dict: device dictionary
     :rtype: Device
     """
-    device = Device(name, device_dict.get('delimiter', ';').encode('utf-8'))
+    cls = class_for_name(device_dict.get('module'), device_dict.get('class'))
+    device = cls(name, device_dict.get('delimiter', ';').encode('utf-8'))
 
     device_dict = get_bases(device_dict, loader)
 
